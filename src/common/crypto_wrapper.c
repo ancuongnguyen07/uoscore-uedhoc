@@ -714,6 +714,7 @@ enum err WEAK shared_secret_derive(enum ecdh_alg alg,
 
 		TRY_EXPECT_PSA(psa_crypto_init(), PSA_SUCCESS, key_id,
 			       unexpected_result_from_ext_lib);
+		printf("PSA inits successfully!\n");
 
 		psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
 		psa_set_key_lifetime(&attr, PSA_KEY_LIFETIME_VOLATILE);
@@ -726,6 +727,8 @@ enum err WEAK shared_secret_derive(enum ecdh_alg alg,
 					      &key_id),
 			       PSA_SUCCESS, key_id,
 			       unexpected_result_from_ext_lib);
+		printf("PSA imports key successfully!\n");
+
 		psa_key_type_t type = psa_get_key_type(&attr);
 		size_t shared_size =
 			PSA_RAW_KEY_AGREEMENT_OUTPUT_SIZE(type, bits);
@@ -741,12 +744,15 @@ enum err WEAK shared_secret_derive(enum ecdh_alg alg,
 		    mbedtls_pk_setup(&ctx_verify, mbedtls_pk_info_from_type(
 							  MBEDTLS_PK_ECKEY))) {
 			result = unexpected_result_from_ext_lib;
+			printf("mbedtls_pk_setup fails!\n");
 			goto cleanup;
 		}
 		if (PSA_SUCCESS !=
 		    mbedtls_ecp_group_load(&mbedtls_pk_ec(ctx_verify)->grp,
 					   MBEDTLS_ECP_DP_SECP256R1)) {
 			result = unexpected_result_from_ext_lib;
+			printf("mbedtls_ecp_group_load fails!\n");
+
 			goto cleanup;
 		}
 		if (PSA_SUCCESS !=
@@ -755,6 +761,8 @@ enum err WEAK shared_secret_derive(enum ecdh_alg alg,
 					   &pk_decompressed_len,
 					   sizeof(pk_decompressed))) {
 			result = unexpected_result_from_ext_lib;
+			printf("mbedtls_ecp_decompress fails!\n");
+
 			goto cleanup;
 		}
 
@@ -766,6 +774,8 @@ enum err WEAK shared_secret_derive(enum ecdh_alg alg,
 					  pk_decompressed_len, shared_secret,
 					  shared_size, &shared_secret_len)) {
 			result = unexpected_result_from_ext_lib;
+			printf("psa_raw_key_agreement fails!\n");
+
 			goto cleanup;
 		}
 	cleanup:
@@ -779,9 +789,17 @@ enum err WEAK shared_secret_derive(enum ecdh_alg alg,
 	return crypto_operation_not_implemented;
 }
 
-enum err WEAK ephemeral_dh_key_gen(enum ecdh_alg alg, uint32_t seed,
+enum err WEAK ephemeral_dh_key_gen(uint8_t suite_l, uint32_t seed,
 				   struct byte_array *sk, struct byte_array *pk)
 {
+	struct suite c_suite;
+	int ret = get_suite((enum suite_label) suite_l, &c_suite);
+	if (ret != ok) {
+		return ret;
+	}
+
+	enum ecdh_alg alg = c_suite.edhoc_ecdh;
+
 	if (alg == X25519) {
 #ifdef COMPACT25519
 		uint8_t extended_seed[32];

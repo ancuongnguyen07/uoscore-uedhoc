@@ -85,13 +85,13 @@ struct edhoc_initiator_context {
  *          			IMPORTANT!!! PROVIDE A GOOD RANDOM SEED! 
  *				!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  *
- * @param alg			The ECDH algorithm to be used.
+ * @param suite_l		A suite label.
  * @param seed			A random seed.
  * @param[out] sk 		The newly generated private key.
  * @param[out] pk 		The newly private private key.
  * @return 			Ok or error code.
  */
-enum err WEAK ephemeral_dh_key_gen(enum ecdh_alg alg, uint32_t seed,
+enum err WEAK ephemeral_dh_key_gen(uint8_t suite_l, uint32_t seed,
 				   struct byte_array *sk,
 				   struct byte_array *pk);
 

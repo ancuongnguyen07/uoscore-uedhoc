@@ -29,7 +29,7 @@ extern "C" {
 #define USE_IPV4
 //#define USE_IPV6
 /*comment this out to use DH keys from the test vectors*/
-//#define USE_RANDOM_EPHEMERAL_DH_KEY
+#define USE_RANDOM_EPHEMERAL_DH_KEY
 
 /**
  * @brief	Initializes sockets for CoAP client.
@@ -255,7 +255,7 @@ int main()
 	PRINT_ARRAY("seed", (uint8_t *)&seed, seed_len);
 
 	/*create ephemeral DH keys from seed*/
-	TRY(ephemeral_dh_key_gen(X25519, seed, &X_random, &G_X_random));
+	TRY(ephemeral_dh_key_gen(c_i.suites_i.ptr[0], seed, &X_random, &G_X_random));
 	c_i.g_x.ptr = G_X_random.ptr;
 	c_i.g_x.len = G_X_random.len;
 	c_i.x.ptr = X_random.ptr;

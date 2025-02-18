@@ -36,7 +36,7 @@ char buffer[MAXLINE];
 CoapPDU *rxPDU;
 
 /*comment this out to use DH keys from the test vectors*/
-//#define USE_RANDOM_EPHEMERAL_DH_KEY
+#define USE_RANDOM_EPHEMERAL_DH_KEY
 
 #ifdef USE_IPV6
 struct sockaddr_in6 client_addr;
@@ -290,7 +290,7 @@ int main()
 		fclose(fp);
 		PRINT_ARRAY("seed", (uint8_t *)&seed, seed_len);
 
-		TRY(ephemeral_dh_key_gen(X25519, seed, &Y_random, &G_Y_random));
+		TRY(ephemeral_dh_key_gen(c_r.suites_r.ptr[0], seed, &Y_random, &G_Y_random));
 		PRINT_ARRAY("secret ephemeral DH key", c_r.g_y.ptr,
 			    c_r.g_y.len);
 		PRINT_ARRAY("public ephemeral DH key", c_r.y.ptr, c_r.y.len);
