@@ -133,20 +133,52 @@ static enum err msg2_process(const struct edhoc_initiator_context *c,
 			     bool static_dh_r, struct byte_array *th3,
 			     struct byte_array *PRK_3e2m)
 {
-	BYTE_ARRAY_NEW(g_y, G_Y_SIZE, get_ecdh_pk_len(rc->suite.edhoc_ecdh));
+	uint32_t g_y_len;
+	enum ecdh_alg ke_alg = rc->suite.edhoc_ecdh;
+	uint32_t g_xy_len = get_shared_secret_len(ke_alg);
+	switch (ke_alg)
+	{
+	case ML_KEM_768:
+		// KEM ciphertext length
+		g_y_len = get_kem_ctxt_len(ke_alg);
+		break;
+	case P256:
+	case X25519:
+		g_y_len = get_ecdh_pk_len(ke_alg);
+		break;
+	default:
+		return unsupported_ecdh_curve;
+	}
+
+	// BYTE_ARRAY_NEW(g_y, G_Y_SIZE, get_ecdh_pk_len(rc->suite.edhoc_ecdh));
+	BYTE_ARRAY_NEW(g_y, g_y_len, g_y_len);
 	uint32_t ciphertext_len = rc->msg.len - g_y.len;
 	ciphertext_len -= BSTR_ENCODING_OVERHEAD(ciphertext_len);
 	BYTE_ARRAY_NEW(ciphertext, CIPHERTEXT2_SIZE, ciphertext_len);
 	BYTE_ARRAY_NEW(plaintext, PLAINTEXT2_SIZE, ciphertext.len);
 	PRINT_ARRAY("message_2 (CBOR Sequence)", rc->msg.ptr, rc->msg.len);
 
+	
 	/*parse the message*/
 	TRY(msg2_parse(&rc->msg, &g_y, &ciphertext));
 
 	/*calculate the DH shared secret*/
-	BYTE_ARRAY_NEW(g_xy, ECDH_SECRET_SIZE, ECDH_SECRET_SIZE);
+	// FORTUNATELY, shared secret sizes of ECDH and KEM are equal, both are 32 bytes 
+	BYTE_ARRAY_NEW(g_xy, g_xy_len, g_xy_len);
 
-	TRY(shared_secret_derive(rc->suite.edhoc_ecdh, &c->x, &g_y, g_xy.ptr));
+	switch (ke_alg)
+	{
+	case ML_KEM_768:
+		TRY(kem_decap(&c->x, &g_y, g_xy.ptr));
+		break;
+	case P256:
+	case X25519:
+		TRY(shared_secret_derive(rc->suite.edhoc_ecdh, &c->x, &g_y, g_xy.ptr));
+		break;
+	default:
+		return unsupported_ecdh_curve;
+	}
+	// TRY(shared_secret_derive(rc->suite.edhoc_ecdh, &c->x, &g_y, g_xy.ptr));
 	PRINT_ARRAY("G_XY (ECDH shared secret) ", g_xy.ptr, g_xy.len);
 
 	/*calculate th2*/

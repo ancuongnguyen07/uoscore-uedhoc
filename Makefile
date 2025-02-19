@@ -152,6 +152,14 @@ C_INCLUDES += -Iexternals/mbedtls/include/mbedtls
 C_INCLUDES += -Iexternals/mbedtls/include/psa 
 endif
 
+# ------------------------ PQC stuff ------------------------
+ifeq ($(findstring PQC,$(EXTENDED_CFLAGS)),PQC)
+C_INCLUDES += -Iexternals/ml_kem_768
+C_INCLUDES += -Iexternals/ml_kem_768/common
+endif
+# -----------------------------------------------------------
+
+
 # CBOR engine
 ifeq ($(findstring ZCBOR,$(EXTENDED_CFLAGS)),ZCBOR)
 C_INCLUDES += -Iexternals/zcbor/include

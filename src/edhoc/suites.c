@@ -56,6 +56,16 @@ enum err get_suite(enum suite_label label, struct suite *suite)
 		suite->app_aead = AES_CCM_16_64_128;
 		suite->app_hash = SHA_256;
 		break;
+	case SUITE_4:
+		suite->suite_label = SUITE_0;
+		suite->edhoc_aead = AES_CCM_16_64_128;
+		suite->edhoc_hash = SHA_256;
+		suite->edhoc_mac_len_static_dh = MAC8;
+		suite->edhoc_ecdh = ML_KEM_768; // different point from SUITE_0
+		suite->edhoc_sign = EdDSA;
+		suite->app_aead = AES_CCM_16_64_128;
+		suite->app_hash = SHA_256;
+		break;
 	default:
 		return unsupported_cipher_suite;
 		break;
@@ -127,6 +137,49 @@ uint32_t get_ecdh_pk_len(enum ecdh_alg alg)
 		return 32;
 		break;
 	case X25519:
+		return 32;
+		break;
+	case ML_KEM_768:
+		return 1184;
+		break;
+	}
+	return 0;
+}
+
+uint32_t get_ecdh_sk_len(enum ecdh_alg alg) {
+	switch (alg)
+	{
+	case X25519:
+		return 32;
+		break;
+	case P256:
+		return 32;
+		break;
+	case ML_KEM_768:
+		return 2400;
+		break;
+	}
+	return 0;
+}
+
+uint32_t get_kem_ctxt_len(enum ecdh_alg alg) {
+	switch (alg)
+	{
+	case ML_KEM_768:
+		return 1088;
+		break;
+	default:
+		break;
+	}
+	return 0;
+}
+
+uint32_t get_shared_secret_len(enum ecdh_alg alg) {
+	switch (alg)
+	{
+	case X25519:
+	case P256:
+	case ML_KEM_768:
 		return 32;
 		break;
 	}

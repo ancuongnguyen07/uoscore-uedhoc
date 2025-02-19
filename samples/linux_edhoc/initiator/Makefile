@@ -112,14 +112,25 @@ TINYCRYPT_ALL_C_SOURCES += $(wildcard ${TINYCRYPT_DIR}/*.c)
 TINYCRYPT_INCLUDES := -I${ROOT_DIR}/externals/tinycrypt/lib/include
 TINYCRYPT_SOURCES := $(filter-out ${TINYCRYPT_DIR}/sha256.c, $(wildcard ${ROOT_DIR}/externals/tinycrypt/lib/source/*.c))
 
+# ------------------------ PQC stuff ------------------------
+# Besides adding `includes` and `sources` here, you NEED to add them to the final
+# `SOURCES` and `INCLUDES` flags. For example, `SOURCES += ML_KEM_C_SOURCES`
+# `INCLUDES += ML_KEM_INCLUDES`. See section below
+ML_KEM_DIR := ${ROOT_DIR}/externals/ml_kem_768
+ML_KEM_C_SOURCES := $(wildcard ${ML_KEM_DIR}/mlkem/*.c) $(wildcard ${ML_KEM_DIR}/common/*.c)
+ML_KEM_INCLUDES := -I${ML_KEM_DIR}/mlkem -I${ML_KEM_DIR}/common
+# -----------------------------------------------------------
+
 CANTCOAP_DIR :=  ${ROOT_DIR}/externals/cantcoap
 CANTCOAP_SOURCES := ${CANTCOAP_DIR}/cantcoap.cpp
 CANTCOAP_INCLUDES := -I${CANTCOAP_DIR}
 
+# Final SOURCES and INCLUDES flag
 SOURCES := ${INITIATOR_SOURCES}
 SOURCES += ${TINYCRYPT_SOURCES}
 SOURCES += ${COMPACT25519_C_SOURCES}
 SOURCES += ${MBEDTLS_SOURCES}
+SOURCES += ${ML_KEM_C_SOURCES} # ML-KEM-768 package
 SOURCES += ${ZCBOR_C_SOURCES}
 SOURCES += ${COMMON_SOURCES}
 SOURCES += ${CANTCOAP_SOURCES}
@@ -127,6 +138,7 @@ OBJECTS := $(patsubst ${ROOT_DIR}/%.cpp,${BUILD_DIR}/%.o,$(patsubst ${ROOT_DIR}/
 INCLUDES := ${TINYCRYPT_INCLUDES}
 INCLUDES += ${COMPACT25519_INCLUDES}
 INCLUDES += ${MBEDTLS_INCLUDES}
+INCLUDES += ${ML_KEM_INCLUDES} # ML-KEM-768 package
 INCLUDES += ${ZCBOR_INCLUDES}
 INCLUDES += ${COMMON_INCLUDES}
 INCLUDES += ${INITIATOR_INCLUDES}

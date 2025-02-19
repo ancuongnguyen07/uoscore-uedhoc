@@ -63,6 +63,10 @@ modify setting in include/psa/crypto_config.h
 #include <tinycrypt/ecc_dh.h>
 #endif
 
+#ifdef PQC
+#include <mlkem/kem.h>
+#endif
+
 #ifdef MBEDTLS
 #define TRY_EXPECT_PSA(x, expected_result, key_id, err_code)                   \
 	do {                                                                   \
@@ -673,6 +677,50 @@ enum err WEAK hkdf_sha_256(struct byte_array *master_secret,
 	TRY(hkdf_expand(SHA_256, &prk, info, out));
 	return ok;
 }
+
+
+// ------------------ KEM ---------------------
+#ifdef PQC
+enum err WEAK kem_gen_keypair(const struct byte_array *pk, const struct byte_array *sk) {
+	if (pk->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_PUBLICKEYBYTES) {
+		return kem_err;
+	}
+	if (sk->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_SECRETKEYBYTES) {
+		return kem_err;
+	}
+	PQCLEAN_MLKEM768_CLEAN_crypto_kem_keypair(pk->ptr, sk->ptr);
+	return ok;
+}
+
+enum err WEAK kem_encap(const struct byte_array *pk, struct byte_array *ct, uint8_t *shared_secret) {
+	if (pk->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_PUBLICKEYBYTES) {
+		return kem_err;
+	}
+	if (ct->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_CIPHERTEXTBYTES) {
+		return kem_err;
+	}
+	int ret = PQCLEAN_MLKEM768_CLEAN_crypto_kem_enc(ct->ptr, shared_secret, pk->ptr);
+	if (ret != 0) {
+		return kem_err; 
+	}
+	return ok;
+}
+
+enum err WEAK kem_decap(const struct byte_array *sk, const struct byte_array *ct, uint8_t *shared_secret) {
+	if (sk->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_SECRETKEYBYTES) {
+		return kem_err;
+	}
+	if (ct->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_CIPHERTEXTBYTES) {
+		return kem_err;
+	}
+	int ret = PQCLEAN_MLKEM768_CLEAN_crypto_kem_dec(shared_secret, ct->ptr, sk->ptr);
+	if (ret != 0) {
+		return kem_err;
+	}
+
+	return ok;
+}
+#endif // PQC
 
 enum err WEAK shared_secret_derive(enum ecdh_alg alg,
 				   const struct byte_array *sk,

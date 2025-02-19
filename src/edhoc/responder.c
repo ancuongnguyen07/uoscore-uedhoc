@@ -92,6 +92,9 @@ msg1_parse(struct byte_array *msg1, enum method_type *method,
 		}
 		suites_i->len = (uint32_t)m.SUITES_I_suite_l_suite_count;
 	}
+	if (suites_i->len == 0) {
+		return unsupported_cipher_suite;
+	}
 	PRINT_ARRAY("msg1 SUITES_I", suites_i->ptr, suites_i->len);
 
 	/*G_X*/
@@ -179,6 +182,7 @@ enum err msg2_gen(struct edhoc_responder_context *c, struct runtime_context *rc,
 	TRY(msg1_parse(&rc->msg, &method, &suites_i, &g_x, c_i, &rc->ead));
 
 	// TODO this may be a vulnerability in case suites_i.len is zero
+	// Cuong: I already made zero-length check in `msg1_parse`
 	if (!(selected_suite_is_supported(suites_i.ptr[suites_i.len - 1],
 					  &c->suites_r))) {
 		// TODO implement here the sending of an error message
@@ -197,9 +201,32 @@ enum err msg2_gen(struct edhoc_responder_context *c, struct runtime_context *rc,
 	TRY(hash(rc->suite.edhoc_hash, &rc->msg, &rc->msg1_hash));
 	TRY(th2_calculate(rc->suite.edhoc_hash, &rc->msg1_hash, &c->g_y, &th2));
 
-	/*calculate the DH shared secret*/
+
+	// Calculate the shared secret G_XY
+	// struct byte_array g_xy;
+	// FORTUNATELY, shared secret sizes of ECDH and KEM are equal, both are 32 bytes 
 	BYTE_ARRAY_NEW(g_xy, ECDH_SECRET_SIZE, ECDH_SECRET_SIZE);
-	TRY(shared_secret_derive(rc->suite.edhoc_ecdh, &c->y, &g_x, g_xy.ptr));
+	// get the key exchange algorithm: ECDH, KEM, or NIKE
+	enum ecdh_alg ke_alg = rc->suite.edhoc_ecdh;
+	// If KEM is used then
+	switch (ke_alg)
+	{
+	case ML_KEM_768:
+		/* Initiate a buffer for KEM ciphertext (c->g_y) was already did at application code/sample */
+		// Do KEM Encapsulation with the given public key from Initiator (g_x)
+		TRY(kem_encap(&g_x, &c->g_y, g_xy.ptr));
+		break;
+	case P256:
+	case X25519: // P256 or X25519
+		TRY(shared_secret_derive(rc->suite.edhoc_ecdh, &c->y, &g_x, g_xy.ptr));
+		break;
+	default:
+		return unsupported_ecdh_curve;
+	}
+	// If DH is used then
+	/*calculate the DH shared secret*/
+	// BYTE_ARRAY_NEW(g_xy, ECDH_SECRET_SIZE, ECDH_SECRET_SIZE);
+	// TRY(shared_secret_derive(rc->suite.edhoc_ecdh, &c->y, &g_x, g_xy.ptr));
 
 	PRINT_ARRAY("G_XY (ECDH shared secret) ", g_xy.ptr, g_xy.len);
 

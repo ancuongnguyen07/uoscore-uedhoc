@@ -69,6 +69,15 @@ ifeq ($(findstring MBEDTLS,$(CRYPTO_ENGINE)),MBEDTLS)
 C_SOURCES += $(wildcard ../../../externals/mbedtls/library/*.c)
 endif
 
+# ------------------------ PQC stuff ------------------------
+ifeq ($(findstring PQC,$(CRYPTO_ENGINE)),PQC)
+ML_KEM_DIR := ${ROOT_DIR}/externals/ml_kem_768
+C_SOURCES += $(wildcard ${ML_KEM_DIR}/mlkem/*.c) $(wildcard ${ML_KEM_DIR}/common/*.c)
+C_INCLUDES += -I${ML_KEM_DIR} -I${ML_KEM_DIR}/common
+endif
+# -----------------------------------------------------------
+
+
 # C includes
 C_INCLUDES += -I../../../inc/ 
 C_INCLUDES += -I../../common/

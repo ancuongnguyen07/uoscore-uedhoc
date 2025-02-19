@@ -31,6 +31,9 @@ extern "C" {
 /*comment this out to use DH keys from the test vectors*/
 #define USE_RANDOM_EPHEMERAL_DH_KEY
 
+/*comment this out if you do not want to use KEM*/
+// #define USE_EPHEMERAL_KEM_KEY
+
 /**
  * @brief	Initializes sockets for CoAP client.
  * @param
@@ -154,7 +157,7 @@ int main()
 #define ORIG
 #ifdef ORIG
 
-	uint8_t TEST_VEC_NUM = 1;
+	uint8_t TEST_VEC_NUM = 5;
 	uint8_t vec_num_i = TEST_VEC_NUM - 1;
 
 	c_i.sock = &sockfd;
@@ -238,7 +241,7 @@ int main()
 	cred_r.ca_pk.len = 0;
 	cred_r.ca_pk.ptr = NULL;
 
-#endif
+#endif // T1_RFC9529
 
 	struct cred_array cred_r_array = { .len = 1, .ptr = &cred_r };
 
@@ -263,13 +266,33 @@ int main()
 	PRINT_ARRAY("secret ephemeral DH key", c_i.g_x.ptr, c_i.g_x.len);
 	PRINT_ARRAY("public ephemeral DH key", c_i.x.ptr, c_i.x.len);
 
-#endif
+#endif // USE_RANDOM_EPHEMERAL_DH_KEY
+
+#ifdef USE_EPHEMERAL_KEM
+	// ML-KEM-768 is experimented in this case
+	// Reserves buffers for private/public key pair for KEM
+	// ephemeral KEM private key
+	BYTE_ARRAY_NEW(X_random, 2400, 2400);
+	// ephemeral KEM public key
+	BYTE_ARRAY_NEW(G_X_random, 1184, 1184);
+
+	TRY(kem_gen_keypair(&G_X_random, &X_random));
+	c_i.g_x.ptr = G_X_random.ptr;
+	c_i.g_x.len = G_X_random.len;
+	c_i.x.ptr = X_random.ptr;
+	c_i.x.len = X_random.len;
+	PRINT_ARRAY("secret KEM key", c_i.x.ptr, c_i.x.len);
+	PRINT_ARRAY("public KEM key", c_i.g_x.ptr, c_i.g_x.len);
+
+#endif // USE_EPHEMERAL_KEM
 
 #ifdef TINYCRYPT
 	/* Register RNG function */
 	uECC_set_rng(default_CSPRNG);
-#endif
+#endif // TINYCRYPT
 
+	// The common workflow starts from here regardless of cipher suite
+	// and authentication mode.
 	TRY_EXPECT(start_coap_client(&sockfd), 0);
 	TRY(edhoc_initiator_run(&c_i, &cred_r_array, &err_msg, &PRK_out, tx, rx,
 				ead_process));

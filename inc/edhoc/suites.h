@@ -22,6 +22,7 @@ enum suite_label {
 	SUITE_1 = 1,
 	SUITE_2 = 2,
 	SUITE_3 = 3,
+	SUITE_4 = 4,
 };
 
 enum aead_alg {
@@ -34,6 +35,7 @@ enum hash_alg { SHA_256 = -16 };
 enum ecdh_alg {
 	P256 = 1,
 	X25519 = 4,
+	ML_KEM_768 = 9, // currently this value is unassigned in COSE specification
 };
 
 enum sign_alg {
@@ -108,11 +110,35 @@ uint32_t get_aead_iv_len(enum aead_alg alg);
 uint32_t get_signature_len(enum sign_alg alg);
 
 /**
- * @brief 			Gets the length of the ECDH public key.
+ * @brief 			Gets the length of the ECDH/KEM/NIKE public key.
  * 
  * @param alg 			The used ECDH algorithm. 
  * @retval 			The length.
  */
 uint32_t get_ecdh_pk_len(enum ecdh_alg alg);
+
+/**
+ * @brief			Gets the length of the private ECDH/KEM/NIKE key.
+ * 
+ * @param alg		The used algorithms, could be ECDH/KEM/NIKE.
+ * @retval			The length.
+ */
+uint32_t get_ecdh_sk_len(enum ecdh_alg alg);
+
+/**
+ * @brief 			Gets the length of KEM ciphertext
+ * 
+ * @param kem_alg	The ECDH algorithm, thinking about to migrate to a separate ENUM later.
+ * @retval			The length.
+ */
+uint32_t get_kem_ctxt_len(enum ecdh_alg kem_alg);
+
+/**
+ * @brief 			Gets the length of the shared secret of ECDH,KEM, or NIKE.
+ * 
+ * @param alg		The used alogrithms.
+ * @retval			The lentgh.
+ */
+uint32_t get_shared_secret_len(enum ecdh_alg alg);
 
 #endif

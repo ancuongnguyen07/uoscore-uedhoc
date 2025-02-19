@@ -28,6 +28,9 @@ enum err {
 	not_implemented = 8,
 	vla_insufficient_size = 9,
 
+	// PQC-variant error message
+	kem_err = 10,
+
 
 	/*EDHOC specific errors*/
 	/*todo implement error messages*/

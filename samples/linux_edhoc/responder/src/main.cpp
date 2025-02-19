@@ -38,6 +38,9 @@ CoapPDU *rxPDU;
 /*comment this out to use DH keys from the test vectors*/
 #define USE_RANDOM_EPHEMERAL_DH_KEY
 
+/*comment this out if you do not want to use KEM*/
+// #define USE_EPHEMERAL_KEM
+
 #ifdef USE_IPV6
 struct sockaddr_in6 client_addr;
 #endif
@@ -183,7 +186,7 @@ int main()
 #define ORIG
 #ifdef ORIG
 
-	uint8_t TEST_VEC_NUM = 1;
+	uint8_t TEST_VEC_NUM = 5;
 	uint8_t vec_num_i = TEST_VEC_NUM - 1;
 
 	c_r.sock = &sockfd;
@@ -277,7 +280,15 @@ int main()
 	c_r.g_y.len = G_Y_random.len;
 	c_r.y.ptr = Y_random.ptr;
 	c_r.y.len = Y_random.len;
-#endif
+#endif // USE_RANDOM_EPHEMERAL_DH_KEY
+
+#ifdef USE_EPHEMERAL_KEM
+	// ML-KEM-768 is experimented in this case
+	// Reserves a buffer for KEM ciphertext
+	BYTE_ARRAY_NEW(G_Y_random, 1088, 1088);
+	c_r.g_y.ptr = G_Y_random.ptr;
+	c_r.g_y.len = G_Y_random.len;
+#endif // USE_EPHEMERAL_KEM
 
 	while (1) {
 #ifdef USE_RANDOM_EPHEMERAL_DH_KEY
@@ -294,7 +305,7 @@ int main()
 		PRINT_ARRAY("secret ephemeral DH key", c_r.g_y.ptr,
 			    c_r.g_y.len);
 		PRINT_ARRAY("public ephemeral DH key", c_r.y.ptr, c_r.y.len);
-#endif
+#endif // USE_RANDOM_EPHEMERAL_DH_KEY
 
 #ifdef TINYCRYPT
 		/* Register RNG function */
