@@ -169,6 +169,9 @@ signature_or_mac(enum sgn_or_mac_op op, bool static_dh, struct suite *suite,
 
 			signature_or_mac->len =
 				get_signature_len(suite->edhoc_sign);
+			
+			PRINT_ARRAY("signature_struct", sign_struct.ptr, sign_struct.len);
+			PRINT_ARRAY("pk for signature", pk->ptr, pk->len);
 
 			TRY(sign(suite->edhoc_sign, sk, pk, &sign_struct,
 				 signature_or_mac->ptr));
@@ -204,11 +207,11 @@ signature_or_mac(enum sgn_or_mac_op op, bool static_dh, struct suite *suite,
 			TRY(signature_struct_gen(th, id_cred, cred, ead, &_mac,
 						 &sign_struct));
 
-			bool result;
-			PRINT_ARRAY("pk", pk->ptr, pk->len);
+			bool result = true;
+			PRINT_ARRAY("pk for signature", pk->ptr, pk->len);
 			PRINT_ARRAY("signature_struct", sign_struct.ptr,
 				    sign_struct.len);
-			PRINT_ARRAY("signature_or_mac", signature_or_mac->ptr,
+			PRINT_ARRAY("signature_or_mac (is signature)", signature_or_mac->ptr,
 				    signature_or_mac->len);
 
 			TRY(verify(suite->edhoc_sign, pk,

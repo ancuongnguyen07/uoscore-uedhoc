@@ -53,7 +53,7 @@ static inline enum err msg2_parse(struct byte_array *msg2,
 	TRY(decode_bstr(msg2, &g_y_ciphertext_2));
 
 	TRY(_memcpy_s(g_y->ptr, g_y->len, g_y_ciphertext_2.ptr, g_y->len));
-	PRINT_ARRAY("g_y", g_y->ptr, g_y->len);
+	PRINT_ARRAY("G_y", g_y->ptr, g_y->len);
 
 	TRY(_memcpy_s(ciphertext2->ptr, ciphertext2->len,
 		      g_y_ciphertext_2.ptr + g_y->len,
@@ -90,6 +90,7 @@ enum err msg1_gen(const struct edhoc_initiator_context *c,
 	/* G_X ephemeral public key */
 	m1.message_1_G_X.value = c->g_x.ptr;
 	m1.message_1_G_X.len = c->g_x.len;
+	PRINT_ARRAY("G_X", c->g_x.ptr, c->g_x.len);
 
 	/* C_I connection ID  of the initiator*/
 	PRINT_ARRAY("C_I", c->c_i.ptr, c->c_i.len);
@@ -112,6 +113,7 @@ enum err msg1_gen(const struct edhoc_initiator_context *c,
 	}
 
 	size_t payload_len_out;
+	// PRINT_ARRAY("message", rc->msg.ptr, rc->msg.len);
 	TRY_EXPECT(cbor_encode_message_1(rc->msg.ptr, rc->msg.len, &m1,
 					 &payload_len_out),
 		   0);
@@ -135,13 +137,20 @@ static enum err msg2_process(const struct edhoc_initiator_context *c,
 {
 	uint32_t g_y_len;
 	enum ecdh_alg ke_alg = rc->suite.edhoc_ecdh;
+	// bool static_dh_i = false;
 	uint32_t g_xy_len = get_shared_secret_len(ke_alg);
 	switch (ke_alg)
 	{
+	// ML-KEM
+	case ML_KEM_512:
 	case ML_KEM_768:
 		// KEM ciphertext length
+		if (rc->static_dh_i) {
+			return kem_unsupport_static_dh_auth;
+		}
 		g_y_len = get_kem_ctxt_len(ke_alg);
 		break;
+	// ECDH
 	case P256:
 	case X25519:
 		g_y_len = get_ecdh_pk_len(ke_alg);
@@ -169,6 +178,9 @@ static enum err msg2_process(const struct edhoc_initiator_context *c,
 	switch (ke_alg)
 	{
 	case ML_KEM_768:
+		if (rc->static_dh_i) {
+			return kem_unsupport_static_dh_auth;
+		}
 		TRY(kem_decap(&c->x, &g_y, g_xy.ptr));
 		break;
 	case P256:

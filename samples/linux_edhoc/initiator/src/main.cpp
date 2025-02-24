@@ -29,10 +29,10 @@ extern "C" {
 #define USE_IPV4
 //#define USE_IPV6
 /*comment this out to use DH keys from the test vectors*/
-#define USE_RANDOM_EPHEMERAL_DH_KEY
+// #define USE_RANDOM_EPHEMERAL_DH_KEY
 
 /*comment this out if you do not want to use KEM*/
-// #define USE_EPHEMERAL_KEM_KEY
+#define USE_EPHEMERAL_KEM_KEY
 
 /**
  * @brief	Initializes sockets for CoAP client.
@@ -157,7 +157,7 @@ int main()
 #define ORIG
 #ifdef ORIG
 
-	uint8_t TEST_VEC_NUM = 5;
+	uint8_t TEST_VEC_NUM = 1;
 	uint8_t vec_num_i = TEST_VEC_NUM - 1;
 
 	c_i.sock = &sockfd;
@@ -268,7 +268,11 @@ int main()
 
 #endif // USE_RANDOM_EPHEMERAL_DH_KEY
 
-#ifdef USE_EPHEMERAL_KEM
+#ifdef USE_EPHEMERAL_KEM_KEY
+	static const uint8_t kem_cipher_suite[] = {0x04};
+	c_i.suites_i.len = 1;
+	c_i.suites_i.ptr = (uint8_t*) kem_cipher_suite;
+
 	// ML-KEM-768 is experimented in this case
 	// Reserves buffers for private/public key pair for KEM
 	// ephemeral KEM private key
@@ -281,10 +285,10 @@ int main()
 	c_i.g_x.len = G_X_random.len;
 	c_i.x.ptr = X_random.ptr;
 	c_i.x.len = X_random.len;
-	PRINT_ARRAY("secret KEM key", c_i.x.ptr, c_i.x.len);
-	PRINT_ARRAY("public KEM key", c_i.g_x.ptr, c_i.g_x.len);
+	// PRINT_ARRAY("secret KEM key", c_i.x.ptr, c_i.x.len);
+	// PRINT_ARRAY("public KEM key", c_i.g_x.ptr, c_i.g_x.len);
 
-#endif // USE_EPHEMERAL_KEM
+#endif // USE_EPHEMERAL_KEM_KEY
 
 #ifdef TINYCRYPT
 	/* Register RNG function */

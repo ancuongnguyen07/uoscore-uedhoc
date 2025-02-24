@@ -239,6 +239,7 @@ static bool decode_ptxt2(
 	&& ((*result).ptxt2_EAD_2_present = ((zcbor_bstr_decode(state, (&(*result).ptxt2_EAD_2)))), 1))));
 
 	if (!tmp_result) {
+		// printf("%s error: %s\r\n", __func__, zcbor_error_str(zcbor_peek_error(state)));
 		zcbor_trace_file(state);
 		zcbor_log("%s error: %s\r\n", __func__, zcbor_error_str(zcbor_peek_error(state)));
 	} else {

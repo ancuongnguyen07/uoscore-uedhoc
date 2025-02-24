@@ -22,7 +22,7 @@ enum suite_label {
 	SUITE_1 = 1,
 	SUITE_2 = 2,
 	SUITE_3 = 3,
-	SUITE_4 = 4,
+	SUITE_4 = 4, // KEM supported suite
 };
 
 enum aead_alg {
@@ -35,7 +35,8 @@ enum hash_alg { SHA_256 = -16 };
 enum ecdh_alg {
 	P256 = 1,
 	X25519 = 4,
-	ML_KEM_768 = 9, // currently this value is unassigned in COSE specification
+	ML_KEM_512 = 9, // currently this value is unassigned in COSE specification
+	ML_KEM_768 = 10, // currently this value is unassigned in COSE specification
 };
 
 enum sign_alg {

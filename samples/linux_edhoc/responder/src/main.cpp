@@ -36,10 +36,10 @@ char buffer[MAXLINE];
 CoapPDU *rxPDU;
 
 /*comment this out to use DH keys from the test vectors*/
-#define USE_RANDOM_EPHEMERAL_DH_KEY
+// #define USE_RANDOM_EPHEMERAL_DH_KEY
 
 /*comment this out if you do not want to use KEM*/
-// #define USE_EPHEMERAL_KEM
+#define USE_EPHEMERAL_KEM
 
 #ifdef USE_IPV6
 struct sockaddr_in6 client_addr;
@@ -186,7 +186,7 @@ int main()
 #define ORIG
 #ifdef ORIG
 
-	uint8_t TEST_VEC_NUM = 5;
+	uint8_t TEST_VEC_NUM = 1;
 	uint8_t vec_num_i = TEST_VEC_NUM - 1;
 
 	c_r.sock = &sockfd;
@@ -283,6 +283,10 @@ int main()
 #endif // USE_RANDOM_EPHEMERAL_DH_KEY
 
 #ifdef USE_EPHEMERAL_KEM
+	static const uint8_t kem_cipher_suite[] = {0x00, 0x01, 0x02, 0x03, 0x04};
+	c_r.suites_r.len = 1;
+	c_r.suites_r.ptr = (uint8_t*) kem_cipher_suite;
+
 	// ML-KEM-768 is experimented in this case
 	// Reserves a buffer for KEM ciphertext
 	BYTE_ARRAY_NEW(G_Y_random, 1088, 1088);

@@ -6,6 +6,9 @@
 
 #ifndef BUFFER_SIZES_H
 #define BUFFER_SIZES_H
+#ifdef PQC
+#include "mlkem/kem.h"
+#endif // PQC
 
 #ifndef EAD_SIZE
 #define EAD_SIZE 0
@@ -51,10 +54,33 @@
 #define P_256_PUB_KEY_UNCOMPRESSED_SIZE 65
 #define P_256_PUB_KEY_X_CORD_SIZE 32
 #define PK_SIZE P_256_PUB_KEY_UNCOMPRESSED_SIZE
+
+// Two below values only used for ECDH
 #define G_Y_SIZE P_256_PUB_KEY_X_CORD_SIZE
 #define G_X_SIZE P_256_PUB_KEY_X_CORD_SIZE
+
+#ifdef PQC
+// ML-KEM sizes
+#define PK_SIZE_KEM PQCLEAN_MLKEM768_CLEAN_CRYPTO_PUBLICKEYBYTES
+#define CIPHERTEXT_KEM_SIZE PQCLEAN_MLKEM768_CLEAN_CRYPTO_CIPHERTEXTBYTES
+#define KEM_SIZE_MAX MAX(PK_SIZE_KEM, CIPHERTEXT_KEM_SIZE)
+
+// PQ NIKE sizes
+// it could be CTIDH for smaller public key size
+// or SWOOSH for fast shared key computation
+
+#define G_Y_SIZE CIPHERTEXT_KEM_SIZE
+#define G_X_SIZE PK_SIZE_KEM
+#endif // PQC
+
+// Two below values used for declaring maximum buffer size for EDHOC messages.
+// #define G_Y_SIZE_MAX MAX(G_Y_SIZE, CIPHERTEXT_KEM_SIZE)
+// #define G_X_SIZE_MAX MAX(G_X_SIZE, PK_SIZE_KEM)
+
 #define G_R_SIZE P_256_PUB_KEY_UNCOMPRESSED_SIZE
 #define G_I_SIZE P_256_PUB_KEY_UNCOMPRESSED_SIZE
+
+
 #define SIGNATURE_SIZE 64
 #define ECDH_SECRET_SIZE 32
 #define PRK_SIZE 32
@@ -91,6 +117,7 @@
 #define MSG_3_SIZE AS_BSTR_SIZE(CIPHERTEXT3_SIZE)
 #define MSG_4_SIZE AS_BSTR_SIZE(CIPHERTEXT4_SIZE)
 
+// *_SIZE_MAX MUST be modified to adapt big sizes of KEM materials.
 #define MSG12_MAX MAX(MSG_1_SIZE, MSG_2_SIZE)
 #define MSG34_MAX MAX(MSG_3_SIZE, MSG_4_SIZE)
 #define MSG_MAX_SIZE MAX(MSG12_MAX, MSG34_MAX)

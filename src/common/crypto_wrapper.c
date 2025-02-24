@@ -459,7 +459,8 @@ enum err WEAK verify(enum sign_alg alg, const struct byte_array *pk,
 #ifdef COMPACT25519
 		int verified =
 			edsign_verify(sgn->ptr, pk->ptr, msg->ptr, msg->len);
-		if (verified) {
+		printf("Signature verification result: %d\n", verified);
+		if (verified != 0) {
 			*result = true;
 		} else {
 			*result = false;

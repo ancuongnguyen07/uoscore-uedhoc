@@ -29,8 +29,8 @@ enum err {
 	vla_insufficient_size = 9,
 
 	// PQC-variant error message
-	kem_err = 10,
-
+	kem_err = 300,
+	kem_unsupport_static_dh_auth = 301,
 
 	/*EDHOC specific errors*/
 	/*todo implement error messages*/

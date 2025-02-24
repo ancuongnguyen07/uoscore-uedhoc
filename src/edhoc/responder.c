@@ -196,11 +196,6 @@ enum err msg2_gen(struct edhoc_responder_context *c, struct runtime_context *rc,
 	bool static_dh_r;
 	authentication_type_get(method, &rc->static_dh_i, &static_dh_r);
 
-	/******************* create and send message 2*************************/
-	BYTE_ARRAY_NEW(th2, HASH_SIZE, get_hash_len(rc->suite.edhoc_hash));
-	TRY(hash(rc->suite.edhoc_hash, &rc->msg, &rc->msg1_hash));
-	TRY(th2_calculate(rc->suite.edhoc_hash, &rc->msg1_hash, &c->g_y, &th2));
-
 
 	// Calculate the shared secret G_XY
 	// struct byte_array g_xy;
@@ -211,14 +206,22 @@ enum err msg2_gen(struct edhoc_responder_context *c, struct runtime_context *rc,
 	// If KEM is used then
 	switch (ke_alg)
 	{
+	// ML-KEM
+	case ML_KEM_512:
 	case ML_KEM_768:
 		/* Initiate a buffer for KEM ciphertext (c->g_y) was already did at application code/sample */
 		// Do KEM Encapsulation with the given public key from Initiator (g_x)
+		if (static_dh_r) {
+			return kem_unsupport_static_dh_auth;
+		}
 		TRY(kem_encap(&g_x, &c->g_y, g_xy.ptr));
+		PRINT_ARRAY("G_XY (KEM shared secret)", g_xy.ptr, g_xy.len);
 		break;
+	// ECDH
 	case P256:
 	case X25519: // P256 or X25519
 		TRY(shared_secret_derive(rc->suite.edhoc_ecdh, &c->y, &g_x, g_xy.ptr));
+		PRINT_ARRAY("G_XY (ECDH shared secret) ", g_xy.ptr, g_xy.len);
 		break;
 	default:
 		return unsupported_ecdh_curve;
@@ -227,8 +230,13 @@ enum err msg2_gen(struct edhoc_responder_context *c, struct runtime_context *rc,
 	/*calculate the DH shared secret*/
 	// BYTE_ARRAY_NEW(g_xy, ECDH_SECRET_SIZE, ECDH_SECRET_SIZE);
 	// TRY(shared_secret_derive(rc->suite.edhoc_ecdh, &c->y, &g_x, g_xy.ptr));
+	// PRINT_ARRAY("G_XY (ECDH shared secret) ", g_xy.ptr, g_xy.len);
 
-	PRINT_ARRAY("G_XY (ECDH shared secret) ", g_xy.ptr, g_xy.len);
+	/******************* create and send message 2*************************/
+	BYTE_ARRAY_NEW(th2, HASH_SIZE, get_hash_len(rc->suite.edhoc_hash));
+	TRY(hash(rc->suite.edhoc_hash, &rc->msg, &rc->msg1_hash));
+	TRY(th2_calculate(rc->suite.edhoc_hash, &rc->msg1_hash, &c->g_y, &th2));
+
 
 	BYTE_ARRAY_NEW(PRK_2e, PRK_SIZE, PRK_SIZE);
 	TRY(hkdf_extract(rc->suite.edhoc_hash, &th2, &g_xy, PRK_2e.ptr));
