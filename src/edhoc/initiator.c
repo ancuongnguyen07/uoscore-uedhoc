@@ -177,11 +177,12 @@ static enum err msg2_process(const struct edhoc_initiator_context *c,
 
 	switch (ke_alg)
 	{
+	case ML_KEM_512:
 	case ML_KEM_768:
 		if (rc->static_dh_i) {
 			return kem_unsupport_static_dh_auth;
 		}
-		TRY(kem_decap(&c->x, &g_y, g_xy.ptr));
+		TRY(kem_decap(ke_alg, &c->x, &g_y, g_xy.ptr));
 		break;
 	case P256:
 	case X25519:

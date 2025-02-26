@@ -154,8 +154,10 @@ endif
 
 # ------------------------ PQC stuff ------------------------
 ifeq ($(findstring PQC,$(EXTENDED_CFLAGS)),PQC)
-C_INCLUDES += -Iexternals/ml_kem_768
-C_INCLUDES += -Iexternals/ml_kem_768/common
+C_INCLUDES += -Iexternals/mlkem
+C_INCLUDES += -Iexternals/mlkem/common
+C_INCLUDES += -Iexternals/mlkem/mlkem512
+# C_INCLUDES += -Iexternals/mlkem/mlkem768
 endif
 # -----------------------------------------------------------
 

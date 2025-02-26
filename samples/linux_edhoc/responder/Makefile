@@ -71,9 +71,21 @@ endif
 
 # ------------------------ PQC stuff ------------------------
 ifeq ($(findstring PQC,$(CRYPTO_ENGINE)),PQC)
-ML_KEM_DIR := ${ROOT_DIR}/externals/ml_kem_768
-C_SOURCES += $(wildcard ${ML_KEM_DIR}/mlkem/*.c) $(wildcard ${ML_KEM_DIR}/common/*.c)
-C_INCLUDES += -I${ML_KEM_DIR} -I${ML_KEM_DIR}/common
+ML_KEM_DIR := $(ROOT_DIR)/externals/mlkem
+
+ML_KEM_512_DIR := $(ML_KEM_DIR)/mlkem512
+ML_KEM_512_C_SOURCES := $(wildcard ${ML_KEM_512_DIR}/clean/*.c)
+ML_KEM_512_INCLUDES := -I$(ML_KEM_512_DIR)/clean
+
+# ML_KEM_768_DIR := $(ML_KEM_DIR)/mlkem768
+# ML_KEM_768_C_SOURCES := $(wildcard ${ML_KEM_768_DIR}/clean/*.c)
+# ML_KEM_768_INCLUDES := -I$(ML_KEM_768_DIR)/clean
+
+ML_KEM_C_SOURCES := $(wildcard ${ML_KEM_DIR}/common/*.c) $(ML_KEM_512_C_SOURCES)
+ML_KEM_INCLUDES := -I$(ML_KEM_DIR)/common $(ML_KEM_512_INCLUDES)
+
+C_SOURCES += $(ML_KEM_C_SOURCES)
+C_INCLUDES += $(ML_KEM_INCLUDES)
 endif
 # -----------------------------------------------------------
 

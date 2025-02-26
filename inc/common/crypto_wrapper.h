@@ -55,22 +55,24 @@ enum err shared_secret_derive(enum ecdh_alg alg, const struct byte_array *sk,
 /**
  * @brief 						KEM encapsulation.
  * 
+ * @param[in] alg				The selected ML-KEM algorithm.
  * @param[in] pk				The pointer to input public key.
  * @param[out] ct				The pointer to output ciphertext.
  * @param[out] shared_secret	The pointer to output shared secret.
  * @return						Ok or error code.
  */
-enum err kem_encap(const struct byte_array *pk, struct byte_array *ct, uint8_t *shared_secret);
+enum err kem_encap(enum ecdh_alg alg, const struct byte_array *pk, struct byte_array *ct, uint8_t *shared_secret);
 
 /**
  * @brief						KEM decapsulation.
  * 
+ * @param[in] alg				The selected ML-KEM algorithm.
  * @param[in] sk				The pointer to input secret key.
  * @param[in] ct				The pointer to input ciphertext.
  * @param[out] shared_secret	The pointer to output shared secret.
  * @return 						Ok or error code.
  */
-enum err kem_decap(const struct byte_array *sk, const struct byte_array *ct, uint8_t *shared_secret);
+enum err kem_decap(enum ecdh_alg alg, const struct byte_array *sk, const struct byte_array *ct, uint8_t *shared_secret);
 
 /**
  * @brief			HKDF extract function, see rfc5869.

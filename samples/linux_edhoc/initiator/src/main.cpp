@@ -269,18 +269,27 @@ int main()
 #endif // USE_RANDOM_EPHEMERAL_DH_KEY
 
 #ifdef USE_EPHEMERAL_KEM_KEY
-	static const uint8_t kem_cipher_suite[] = {0x04};
+	// SUITE 5 supports ML-KEM 512
+	// SUITE 4 supports ML-KEM 768
+	const uint8_t kem_cipher_suite[] = {0x05};
 	c_i.suites_i.len = 1;
 	c_i.suites_i.ptr = (uint8_t*) kem_cipher_suite;
+
+	// get cipher suite
+	struct suite cipher_suite;
+	TRY(get_suite((enum suite_label) *kem_cipher_suite, &cipher_suite));
+	enum ecdh_alg ke_alg = cipher_suite.edhoc_ecdh;
 
 	// ML-KEM-768 is experimented in this case
 	// Reserves buffers for private/public key pair for KEM
 	// ephemeral KEM private key
-	BYTE_ARRAY_NEW(X_random, 2400, 2400);
+	uint32_t x_length = get_ecdh_sk_len(ke_alg);
+	uint32_t g_x_length = get_ecdh_pk_len(ke_alg);
+	BYTE_ARRAY_NEW(X_random, x_length, x_length);
 	// ephemeral KEM public key
-	BYTE_ARRAY_NEW(G_X_random, 1184, 1184);
+	BYTE_ARRAY_NEW(G_X_random, g_x_length, g_x_length);
 
-	TRY(kem_gen_keypair(&G_X_random, &X_random));
+	TRY(kem_gen_keypair(cipher_suite.edhoc_ecdh, &G_X_random, &X_random));
 	c_i.g_x.ptr = G_X_random.ptr;
 	c_i.g_x.len = G_X_random.len;
 	c_i.x.ptr = X_random.ptr;

@@ -22,7 +22,8 @@ enum suite_label {
 	SUITE_1 = 1,
 	SUITE_2 = 2,
 	SUITE_3 = 3,
-	SUITE_4 = 4, // KEM supported suite
+	SUITE_4 = 4, // ML-KEM-768 supported suite
+	SUITE_5 = 5, // ML-KEM-512 supported suite
 };
 
 enum aead_alg {
@@ -42,6 +43,7 @@ enum ecdh_alg {
 enum sign_alg {
 	ES256 = -7,
 	EdDSA = -8,
+	HSS_LMS = -46, // PQC DSA, hash-based
 };
 
 enum mac_len {

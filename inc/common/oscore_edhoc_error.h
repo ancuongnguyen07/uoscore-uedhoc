@@ -31,6 +31,7 @@ enum err {
 	// PQC-variant error message
 	kem_err = 300,
 	kem_unsupport_static_dh_auth = 301,
+	unsupported_kem_alg = 302,
 
 	/*EDHOC specific errors*/
 	/*todo implement error messages*/

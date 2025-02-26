@@ -64,7 +64,8 @@ modify setting in include/psa/crypto_config.h
 #endif
 
 #ifdef PQC
-#include <mlkem/kem.h>
+// #include "mlkem768/clean/api.h"
+#include "mlkem512/clean/api.h"
 #endif
 
 #ifdef MBEDTLS
@@ -682,39 +683,102 @@ enum err WEAK hkdf_sha_256(struct byte_array *master_secret,
 
 // ------------------ KEM ---------------------
 #ifdef PQC
-enum err WEAK kem_gen_keypair(const struct byte_array *pk, const struct byte_array *sk) {
-	if (pk->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_PUBLICKEYBYTES) {
-		return kem_err;
+enum err WEAK kem_gen_keypair(enum ecdh_alg alg, const struct byte_array *pk, const struct byte_array *sk) {
+	int ret = 0;
+	switch (alg)
+	{
+	case ML_KEM_512:
+		if (pk->len != PQCLEAN_MLKEM512_CLEAN_CRYPTO_PUBLICKEYBYTES) {
+			return kem_err;
+		}
+		if (sk->len != PQCLEAN_MLKEM512_CLEAN_CRYPTO_SECRETKEYBYTES) {
+			return kem_err;
+		}
+		ret = PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(pk->ptr, sk->ptr);
+		break;
+	case ML_KEM_768:
+		// if (pk->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_PUBLICKEYBYTES) {
+		// 	return kem_err;
+		// }
+		// if (sk->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_SECRETKEYBYTES) {
+		// 	return kem_err;
+		// }
+		// ret = PQCLEAN_MLKEM768_CLEAN_crypto_kem_keypair(pk->ptr, sk->ptr);
+		return unsupported_kem_alg;
+		break;
+	default:
+		return unsupported_kem_alg;
+		break;
 	}
-	if (sk->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_SECRETKEYBYTES) {
-		return kem_err;
-	}
-	PQCLEAN_MLKEM768_CLEAN_crypto_kem_keypair(pk->ptr, sk->ptr);
-	return ok;
-}
-
-enum err WEAK kem_encap(const struct byte_array *pk, struct byte_array *ct, uint8_t *shared_secret) {
-	if (pk->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_PUBLICKEYBYTES) {
-		return kem_err;
-	}
-	if (ct->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_CIPHERTEXTBYTES) {
-		return kem_err;
-	}
-	int ret = PQCLEAN_MLKEM768_CLEAN_crypto_kem_enc(ct->ptr, shared_secret, pk->ptr);
+	
 	if (ret != 0) {
-		return kem_err; 
+		return kem_err;
 	}
 	return ok;
 }
 
-enum err WEAK kem_decap(const struct byte_array *sk, const struct byte_array *ct, uint8_t *shared_secret) {
-	if (sk->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_SECRETKEYBYTES) {
+enum err WEAK kem_encap(enum ecdh_alg alg, const struct byte_array *pk, struct byte_array *ct, uint8_t *shared_secret) {
+	int ret = 0;
+	switch (alg)
+	{
+	case ML_KEM_512:
+		if (pk->len != PQCLEAN_MLKEM512_CLEAN_CRYPTO_PUBLICKEYBYTES) {
+			return kem_err;
+		}
+		if (ct->len != PQCLEAN_MLKEM512_CLEAN_CRYPTO_CIPHERTEXTBYTES) {
+			return kem_err;
+		}
+		ret = PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(ct->ptr, shared_secret, pk->ptr);
+		break;
+	case ML_KEM_768:
+		// if (pk->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_PUBLICKEYBYTES) {
+		// 	return kem_err;
+		// }
+		// if (ct->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_CIPHERTEXTBYTES) {
+		// 	return kem_err;
+		// }
+		// ret = PQCLEAN_MLKEM768_CLEAN_crypto_kem_enc(ct->ptr, shared_secret, pk->ptr);up
+		return unsupported_kem_alg;
+		break;
+	default:
+		return unsupported_kem_alg;
+		break;
+	}
+
+	if (ret != 0) {
 		return kem_err;
 	}
-	if (ct->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_CIPHERTEXTBYTES) {
-		return kem_err;
+	return ok;
+}
+
+enum err WEAK kem_decap(enum ecdh_alg alg, const struct byte_array *sk, const struct byte_array *ct, uint8_t *shared_secret) {
+	int ret = 0;
+	switch (alg)
+	{
+	case ML_KEM_512:
+		if (sk->len != PQCLEAN_MLKEM512_CLEAN_CRYPTO_SECRETKEYBYTES) {
+			return kem_err;
+		}
+		if (ct->len != PQCLEAN_MLKEM512_CLEAN_CRYPTO_CIPHERTEXTBYTES) {
+			return kem_err;
+		}
+		ret = PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(shared_secret, ct->ptr, sk->ptr);
+		break;
+	case ML_KEM_768:
+		// if (sk->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_SECRETKEYBYTES) {
+		// 	return kem_err;
+		// }
+		// if (ct->len != PQCLEAN_MLKEM768_CLEAN_CRYPTO_CIPHERTEXTBYTES) {
+		// 	return kem_err;
+		// }
+		// ret = PQCLEAN_MLKEM768_CLEAN_crypto_kem_dec(shared_secret, ct->ptr, sk->ptr);
+		return unsupported_kem_alg;
+		break;
+	default:
+		return unsupported_kem_alg;
+		break;
 	}
-	int ret = PQCLEAN_MLKEM768_CLEAN_crypto_kem_dec(shared_secret, ct->ptr, sk->ptr);
+	
 	if (ret != 0) {
 		return kem_err;
 	}

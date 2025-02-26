@@ -98,11 +98,12 @@ enum err WEAK ephemeral_dh_key_gen(uint8_t suite_l, uint32_t seed,
 /**
  * @brief			Generate KEM public/private key pair.
  * 
+ * @param[in] alg	The selected ML-KEM algorithm.
  * @param[out] pk 	The pointer to output public key.
  * @param[out] sk 	The pointer to output private key.
  * @return			Ok or error code.
  */
-enum err kem_gen_keypair(const struct byte_array *pk, const struct byte_array *sk);
+enum err kem_gen_keypair(enum ecdh_alg alg, const struct byte_array *pk, const struct byte_array *sk);
 
 /**
  * @brief   			Executes EDHOC on the initiator side.

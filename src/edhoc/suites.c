@@ -57,11 +57,21 @@ enum err get_suite(enum suite_label label, struct suite *suite)
 		suite->app_hash = SHA_256;
 		break;
 	case SUITE_4:
-		suite->suite_label = SUITE_4; // different point from SUITE_2
+		suite->suite_label = SUITE_4; // difference from SUITE_2
 		suite->edhoc_aead = AES_CCM_16_64_128;
 		suite->edhoc_hash = SHA_256;
 		suite->edhoc_mac_len_static_dh = MAC8;
-		suite->edhoc_ecdh = ML_KEM_768; // different point from SUITE_2
+		suite->edhoc_ecdh = ML_KEM_768; // difference from SUITE_2
+		suite->edhoc_sign = ES256;
+		suite->app_aead = AES_CCM_16_64_128;
+		suite->app_hash = SHA_256;
+		break;
+	case SUITE_5:
+		suite->suite_label = SUITE_5;
+		suite->edhoc_aead = AES_CCM_16_64_128;
+		suite->edhoc_hash = SHA_256;
+		suite->edhoc_mac_len_static_dh = MAC8;
+		suite->edhoc_ecdh = ML_KEM_512;
 		suite->edhoc_sign = ES256;
 		suite->app_aead = AES_CCM_16_64_128;
 		suite->app_hash = SHA_256;

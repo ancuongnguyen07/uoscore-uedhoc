@@ -208,21 +208,41 @@ enum err msg2_gen(struct edhoc_responder_context *c, struct runtime_context *rc,
 	{
 	// ML-KEM
 	case ML_KEM_512:
-	case ML_KEM_768:
+	case ML_KEM_768: {
 		/* Initiate a buffer for KEM ciphertext (c->g_y) was already did at application code/sample */
 		// Do KEM Encapsulation with the given public key from Initiator (g_x)
 		if (static_dh_r) {
 			return kem_unsupport_static_dh_auth;
 		}
-		TRY(kem_encap(&g_x, &c->g_y, g_xy.ptr));
+		
+		uint32_t desired_len = get_kem_ctxt_len(ke_alg);
+		if (desired_len > c->g_y.len) {
+			return buffer_to_small;
+		}
+		else {
+			c->g_y.len = desired_len;
+		}
+
+		TRY(kem_encap(ke_alg, &g_x, &c->g_y, g_xy.ptr));
 		PRINT_ARRAY("G_XY (KEM shared secret)", g_xy.ptr, g_xy.len);
 		break;
+	}
 	// ECDH
 	case P256:
-	case X25519: // P256 or X25519
+	case X25519: {// P256 or X25519
+		// modify g_y buffer to have a valid length for the chosen cipher suite
+		uint32_t desired_len = get_ecdh_pk_len(ke_alg);
+		if (desired_len > c->g_y.len) {
+			return buffer_to_small;
+		}
+		else {
+			c->g_y.len = desired_len;
+		}
+
 		TRY(shared_secret_derive(rc->suite.edhoc_ecdh, &c->y, &g_x, g_xy.ptr));
 		PRINT_ARRAY("G_XY (ECDH shared secret) ", g_xy.ptr, g_xy.len);
 		break;
+	}
 	default:
 		return unsupported_ecdh_curve;
 	}

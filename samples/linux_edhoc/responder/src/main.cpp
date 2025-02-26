@@ -283,7 +283,7 @@ int main()
 #endif // USE_RANDOM_EPHEMERAL_DH_KEY
 
 #ifdef USE_EPHEMERAL_KEM
-	static const uint8_t kem_cipher_suite[] = {0x00, 0x01, 0x02, 0x03, 0x04};
+	static const uint8_t kem_cipher_suite[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
 	c_r.suites_r.len = 1;
 	c_r.suites_r.ptr = (uint8_t*) kem_cipher_suite;
 
