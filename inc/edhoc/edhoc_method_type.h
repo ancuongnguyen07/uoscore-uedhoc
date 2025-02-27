@@ -8,6 +8,11 @@
    option. This file may not be copied, modified, or distributed
    except according to those terms.
 */
+/*
+Authors of Method 4:
+- Cuong Nguyen: cuong.nguyen@h-partner.com
+- Sampo Sovio: sampo.sovio@huawei.com
+*/
 
 #ifndef EDHOC_METHOD_TYPE_H
 #define EDHOC_METHOD_TYPE_H
@@ -24,8 +29,9 @@
 |     1 | Signature Key     | Static DH Key     | [1]               |
 |     2 | Static DH Key     | Signature Key     | [1]               |
 |     3 | Static DH Key     | Static DH Key     | [1]               |
+|     4 | KEM               | KEM               | New Method by Us  |
 +-------+-------------------+-------------------+-------------------+
-[1]: https://datatracker.ietf.org/doc/draft-ietf-lake-edhoc/
+[1]: https://datatracker.ietf.org/doc/html/rfc9528
 */
 
 enum method_type {
@@ -33,6 +39,7 @@ enum method_type {
 	INITIATOR_SK_RESPONDER_SDHK = 1,
 	INITIATOR_SDHK_RESPONDER_SK = 2,
 	INITIATOR_SDHK_RESPONDER_SDHK = 3,
+   INITIATOR_KEM_RESPONDER_KEM = 4,
 };
 
 /**

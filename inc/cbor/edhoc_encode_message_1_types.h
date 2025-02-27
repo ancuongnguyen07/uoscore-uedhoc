@@ -29,7 +29,7 @@ struct message_1 {
 	int32_t message_1_METHOD;
 	union {
 		struct {
-			int32_t SUITES_I_suite_l_suite[10];
+			int32_t SUITES_I_suite_l_suite[10]; // maximum 10 suites
 			size_t SUITES_I_suite_l_suite_count;
 		};
 		int32_t message_1_SUITES_I_int;
@@ -49,6 +49,12 @@ struct message_1 {
 	} message_1_C_I_choice;
 	struct zcbor_string message_1_ead_1;
 	bool message_1_ead_1_present;
+};
+
+struct message_1_kem {
+	struct message_1 mess_1;
+	struct zcbor_string ct_auth_R;
+	struct zcbor_string enc_auth_R;
 };
 
 #ifdef __cplusplus

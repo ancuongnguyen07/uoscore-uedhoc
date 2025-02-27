@@ -56,6 +56,7 @@ struct edhoc_responder_context {
 	struct byte_array cred_r;
 	struct byte_array sk_r; /*sign key -use with method 0 and 2*/
 	struct byte_array pk_r; /*coresp. pk to sk_r -use with method 0 and 2*/
+	struct byte_array k_auth_i; // Key authentication Initiator in KEM-KEM method
 	void *sock; /*pointer used as handler for sockets by tx/rx */
 	void *params_ead_process; /*parameters for processing EAD1 and EAD3 */
 };
@@ -74,6 +75,7 @@ struct edhoc_initiator_context {
 	struct byte_array i; /* static DH sk -> use only with method 2 or 3*/
 	struct byte_array sk_i; /*sign key use with method 0 and 2*/
 	struct byte_array pk_i; /*coresp. pk to sk_r -use with method 0 and 2*/
+	struct byte_array k_auth_r; // Key authentication Responder in KEM-KEM method
 	void *sock; /*pointer used as handler for sockets by tx/rx */
 	void *params_ead_process; /*parameters for processing EAD2 and EAD4 */
 };

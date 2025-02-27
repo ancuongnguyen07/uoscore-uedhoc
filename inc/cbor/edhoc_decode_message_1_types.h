@@ -51,6 +51,12 @@ struct message_1 {
 	bool message_1_ead_1_present;
 };
 
+struct message_1_kem {
+	struct message_1 mess_1;
+	struct zcbor_string ct_auth_R;
+	struct zcbor_string enc_auth_R;
+};
+
 #ifdef __cplusplus
 }
 #endif

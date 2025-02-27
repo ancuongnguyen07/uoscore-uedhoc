@@ -160,6 +160,7 @@ int main()
 	uint8_t TEST_VEC_NUM = 1;
 	uint8_t vec_num_i = TEST_VEC_NUM - 1;
 
+	// set up Initiator context
 	c_i.sock = &sockfd;
 	c_i.c_i.len = test_vectors[vec_num_i].c_i_len;
 	c_i.c_i.ptr = (uint8_t *)test_vectors[vec_num_i].c_i;
@@ -187,6 +188,9 @@ int main()
 	c_i.pk_i.len = test_vectors[vec_num_i].pk_i_raw_len;
 	c_i.pk_i.ptr = (uint8_t *)test_vectors[vec_num_i].pk_i_raw;
 
+	// set up credentials of other parties
+	// in real world, parties' credentials are provisioned out-of-band,
+	// i.e. factory manufacturing
 	cred_r.id_cred.len = test_vectors[vec_num_i].id_cred_r_len;
 	cred_r.id_cred.ptr = (uint8_t *)test_vectors[vec_num_i].id_cred_r;
 	cred_r.cred.len = test_vectors[vec_num_i].cred_r_len;
@@ -289,13 +293,15 @@ int main()
 	// ephemeral KEM public key
 	BYTE_ARRAY_NEW(G_X_random, g_x_length, g_x_length);
 
+	// set up holder fields for KEM-KEM method, a non-standardized method
+	uint32_t ssk_kem_length = get_shared_secret_len(ke_alg);
+	BYTE_ARRAY_NEW(k_auth_r, ssk_kem_length, ssk_kem_length);
+	c_i.k_auth_r = k_auth_r;
+
 	TRY(kem_gen_keypair(cipher_suite.edhoc_ecdh, &G_X_random, &X_random));
-	c_i.g_x.ptr = G_X_random.ptr;
-	c_i.g_x.len = G_X_random.len;
-	c_i.x.ptr = X_random.ptr;
-	c_i.x.len = X_random.len;
-	// PRINT_ARRAY("secret KEM key", c_i.x.ptr, c_i.x.len);
-	// PRINT_ARRAY("public KEM key", c_i.g_x.ptr, c_i.g_x.len);
+	c_i.g_x = G_X_random;
+	c_i.x = X_random;
+
 
 #endif // USE_EPHEMERAL_KEM_KEY
 

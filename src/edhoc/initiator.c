@@ -66,9 +66,10 @@ static inline enum err msg2_parse(struct byte_array *msg2,
 }
 
 enum err msg1_gen(const struct edhoc_initiator_context *c,
-		  struct runtime_context *rc)
+		  struct runtime_context *rc, const struct cred_array *cred_r_array)
 {
 	struct message_1 m1;
+	struct message_1_kem m1_kem;
 
 	/*METHOD_CORR*/
 	m1.message_1_METHOD = (int32_t)c->method;
@@ -91,6 +92,12 @@ enum err msg1_gen(const struct edhoc_initiator_context *c,
 	m1.message_1_G_X.value = c->g_x.ptr;
 	m1.message_1_G_X.len = c->g_x.len;
 	PRINT_ARRAY("G_X", c->g_x.ptr, c->g_x.len);
+
+	if ((enum method_type) m1.message_1_METHOD == INITIATOR_KEM_RESPONDER_KEM) {
+		// Purely KEM-KEM method, not yet standardized in RFC
+		// looking for the static public key of the Responder
+		
+	}
 
 	/* C_I connection ID  of the initiator*/
 	PRINT_ARRAY("C_I", c->c_i.ptr, c->c_i.len);
@@ -331,7 +338,7 @@ enum err edhoc_initiator_run_extended(
 	runtime_context_init(&rc);
 
 	/*create and send message 1*/
-	TRY(msg1_gen(c, &rc));
+	TRY(msg1_gen(c, &rc, cred_r_array));
 	TRY(tx(c->sock, &rc.msg));
 
 	/*receive message 2*/

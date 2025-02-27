@@ -189,6 +189,7 @@ int main()
 	uint8_t TEST_VEC_NUM = 1;
 	uint8_t vec_num_i = TEST_VEC_NUM - 1;
 
+	// set up Responder context
 	c_r.sock = &sockfd;
 	c_r.c_r.ptr = (uint8_t *)test_vectors[vec_num_i].c_r;
 	c_r.c_r.len = test_vectors[vec_num_i].c_r_len;
@@ -215,6 +216,9 @@ int main()
 	c_r.pk_r.len = test_vectors[vec_num_i].pk_r_raw_len;
 	c_r.pk_r.ptr = (uint8_t *)test_vectors[vec_num_i].pk_r_raw;
 
+	// set up credentials of other parties
+	// in real world, parties' credentials are provisioned out-of-band,
+	// i.e. factory manufacturing
 	cred_i.id_cred.len = test_vectors[vec_num_i].id_cred_i_len;
 	cred_i.id_cred.ptr = (uint8_t *)test_vectors[vec_num_i].id_cred_i;
 	cred_i.cred.len = test_vectors[vec_num_i].cred_i_len;
@@ -284,14 +288,22 @@ int main()
 
 #ifdef USE_EPHEMERAL_KEM
 	static const uint8_t kem_cipher_suite[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
-	c_r.suites_r.len = 1;
-	c_r.suites_r.ptr = (uint8_t*) kem_cipher_suite;
+	c_r.suites_r.len = sizeof(kem_cipher_suite) / sizeof(kem_cipher_suite[0]);
+	c_r.suites_r.ptr = (uint8_t *) kem_cipher_suite;
 
-	// ML-KEM-768 is experimented in this case
+	// ML-KEM-512 is experimented in this case
 	// Reserves a buffer for KEM ciphertext
-	BYTE_ARRAY_NEW(G_Y_random, 1088, 1088);
-	c_r.g_y.ptr = G_Y_random.ptr;
-	c_r.g_y.len = G_Y_random.len;
+	// choose the maximum buffer size covering all key exchange algorithms
+	BYTE_ARRAY_NEW(G_Y_random, 768, 768);
+	// c_r.g_y.ptr = G_Y_random.ptr;
+	// c_r.g_y.len = G_Y_random.len;
+	c_r.g_y = G_Y_random;
+
+	// set up holder fields for KEM-KEM method, a non-standardized method
+	// choose the maximum buffer size covering all key exchange algorithms
+	BYTE_ARRAY_NEW(k_auth_i, 32, 32);
+	c_r.k_auth_i = k_auth_i;
+
 #endif // USE_EPHEMERAL_KEM
 
 	while (1) {
